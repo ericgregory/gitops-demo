@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wasmcloud
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: runtime-operator
+    repoURL: ghcr.io/wasmcloud
+    targetRevision: 0.1.0
+  destination:
+    name: 'in-cluster'
+    namespace: wasmcloud-system
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: -1
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

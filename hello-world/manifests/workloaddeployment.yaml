@@ -1,0 +1,17 @@
+apiVersion: workload.wasmcloud.dev/v1alpha1
+kind: WorkloadDeployment
+metadata:
+  name: hello-world
+  namespace: hello-world
+spec:
+  replicas: 1
+  template:
+    spec:
+      components:
+        - name: hello-world
+          image: ghcr.io/ericgregory/components/hello-world:0.1.0
+      hostInterfaces:
+        - namespace: wasi
+          package: http
+          interfaces:
+            - incoming-handler
