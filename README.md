@@ -16,15 +16,28 @@ The directory includes the following files and directories:
 
 You will need the following tools for this demo:
 
-- A local Kubernetes cluster with CoreDNS (I used [`kind`](https://kind.sigs.k8s.io/))
+- [`kind`](https://kind.sigs.k8s.io/)
 - [`kubectl`](https://kubernetes.io/releases/download/)
 - [Helm](https://helm.sh/docs) v3.8.0+
 - [GitHub account](https://github.com/signup)
 
-If you're using `kind`, start your cluster:
+For the best local Kubernetes experience, install `kind` and start a cluster with the following `kind-config.yaml` configuration:
+
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30950
+        hostPort: 80
+        protocol: TCP
+```
+
+The following command downloads the `kind-config.yaml` from the [wasmCloud runtime operator repository](https://github.com/wasmCloud/runtime-operator/blob/main/kind-config.yaml), starts a cluster, and deletes the config upon completion:
 
 ```shell
-kind create cluster
+curl -fLO https://raw.githubusercontent.com/wasmCloud/runtime-operator/refs/heads/main/kind-config.yaml && kind create cluster --config=kind-config.yaml && rm kind-config.yaml
 ```
 
 You can deploy a simple example installation of Argo CD using the [community-maintained Helm chart](https://argoproj.github.io/argo-helm/):
@@ -76,47 +89,12 @@ Along with the runtime operator itself, the Helm chart will install:
 
 * **Custom resource definitions (CRDs)** for wasmCloud infrastructure and Wasm workloads.
 * [**NATS**](https://docs.nats.io/), a CNCF project that provides a connectivity layer between wasmCloud hosts. (NATS can also be installed separately, if you wish.)
+* **Three wasmCloud hosts**
 
 Apply the manifest with `kubectl`:
 
 ```shell
 kubectl apply -f wasmcloud-proj.yaml
-```
-
-Now we'll deploy a [HostGroup]( TK LINK TO NEW WASMCLOUD DOC) in an Argo Application CRD manifest called `hostgroup-proj.yaml`:
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: hostgroup
-  namespace: argocd
-  annotations:
-    # ArgoCD will apply this manifest first.
-    argocd.argoproj.io/sync-wave: '1'
-spec:
-  project: default
-  source:
-    chart: wasmcloud-hostgroup
-    repoURL: ghcr.io/wasmcloud
-    targetRevision: 0.1.0
-  destination:
-    name: 'in-cluster'
-    namespace: wasmcloud-system
-  syncPolicy:
-    automated: {}
-    retry:
-      limit: -1
-      backoff:
-        duration: 30s
-        factor: 2
-        maxDuration: 5m
-```
-
-Apply the manifest:
-
-```shell
-kubectl apply -f hostgroup-proj.yaml
 ```
 
 The Applications will appear on the Argo CD dashboard. It may take a moment for the Applications to finish syncing.
@@ -125,11 +103,11 @@ The Applications will appear on the Argo CD dashboard. It may take a moment for 
 
 ## Fork the demo repository
 
-Create a fork of the [demo repository in GitHub](https://github.com/ericgregory/gitops-demo). (These instructions assume that you use the name `gitops-demo` for your fork&mdash;if you change the name, remember to adjust the commands accordingly.)
+Create a fork of this repository on GitHub. (These instructions assume that you use the name `gitops-demo` for your fork&mdash;if you change the name, remember to adjust the commands accordingly.)
 
 ![TK Create a fork](TK)
 
-You can clone the repository locally or work entirely in the browser. The only difference is that you'll need to copy and paste an Argo CD Application CRD manifest if you work in the browser.
+You can clone the forked repository locally or work entirely in the browser. The only difference is that you'll need to copy and paste an Argo CD Application CRD manifest if you work in the browser.
 
 If you decide to clone the repo:
 
@@ -143,7 +121,7 @@ cd gitops-demo
 
 ## Deploy a Wasm workload
 
-The `gitops-demo` repository includes an Argo Application CRD manifest called `hello-proj.yaml` that defines a deployment of a simple "Hello world!" Wasm workload:
+At the root of this repository is an Argo Application CRD manifest called `hello-proj.yaml` that defines a deployment of a simple "Hello world!" Wasm workload:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -182,15 +160,16 @@ The Argo Application is now targeting a WorkloadDeployment CRD manifest file in 
 Let's take a quick look at the WorkloadDeployment CRD manifest:
 
 ```yaml
-apiVersion: workload.wasmcloud.dev/v1alpha1
+apiVersion: runtime.wasmcloud.dev/v1alpha1
 kind: WorkloadDeployment
 metadata:
   name: hello-world
-  namespace: hello-world
 spec:
   replicas: 1
   template:
     spec:
+      hostSelector:
+        hostgroup: public-ingress
       components:
         - name: hello-world
           image: ghcr.io/ericgregory/components/hello-world:0.1.0
@@ -199,9 +178,11 @@ spec:
           package: http
           interfaces:
             - incoming-handler
+          config:
+            host: localhost
 ```
 
-Don't make any changes at this stage, but note the OCI artifact we're using on Line 12: it's in the `wasmcloud` namespace and tagged `0.1.0`.
+Don't make any changes at this stage, but note the OCI artifact we're using on Line 12: it's in my namespace and tagged `0.1.0`.
 
 Now apply the `hello-proj.yaml` Argo Application CRD manifest from your `gitops-demo` repo:
 
@@ -259,7 +240,7 @@ In the meantime, let's take a look at the last steps of the GitHub Workflow file
 - name: Update image tag in Kubernetes manifest
   working-directory: ./hello-world
   run: |
-    DEPLOYMENT_FILE="manifests/component.yaml"
+    DEPLOYMENT_FILE="manifests/workloaddeployment.yaml"
     OLD_IMAGE=$(grep "image:" "$DEPLOYMENT_FILE" | awk '{print $2}')
     NEW_IMAGE="ghcr.io/${{ env.GHCR_REPO_NAMESPACE }}/components/hello-world:${{ github.ref_name }}"
 
@@ -287,16 +268,10 @@ You can click through to see the commit that triggered the sync, or click on the
 
 ### Test the deployment
 
-Port-forward to access the hello-world component at [localhost:9091](http://localhost:9091):
-
-```shell
-kubectl -n wasmcloud-system port-forward svc/hostgroup-default 9091:9091
-```
-
 In a new terminal tab:
 
 ```shell
-curl localhost:9091
+curl localhost -i
 ```
 
 ```text
@@ -310,21 +285,12 @@ Once you're done, you can clean up your environment:
 ```shell
 kubectl delete -f wasmcloud-proj.yaml
 ```
-
-```shell
-kubectl delete -f hostgroup-proj.yaml
-```
-
 ```shell
 kubectl delete -f hello-proj.yaml
 ```
-
 ```shell
 helm uninstall argocd -n argocd
 ```
-
-If you're using `kind`:
-
 ```shell
 kind delete cluster
 ```

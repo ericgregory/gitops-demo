@@ -1,12 +1,13 @@
-apiVersion: workload.wasmcloud.dev/v1alpha1
+apiVersion: runtime.wasmcloud.dev/v1alpha1
 kind: WorkloadDeployment
 metadata:
   name: hello-world
-  namespace: hello-world
 spec:
   replicas: 1
   template:
     spec:
+      hostSelector:
+        hostgroup: public-ingress
       components:
         - name: hello-world
           image: ghcr.io/ericgregory/components/hello-world:0.1.0
@@ -15,3 +16,5 @@ spec:
           package: http
           interfaces:
             - incoming-handler
+          config:
+            host: localhost
