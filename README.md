@@ -135,7 +135,9 @@ Along with the runtime operator itself, the Helm chart will install:
 * [**NATS**](https://docs.nats.io/), a CNCF project that provides a connectivity layer between wasmCloud hosts. (NATS can also be installed separately, if you wish.)
 * **Three wasmCloud hosts**
 
-Apply the manifest with `kubectl`:
+If you prefer to apply manifests via the Argo CD UI rather than `kubectl`, click "Create application" and "Edit as YAML." Replace the template with the manifest above and click "Save" and "Create."
+
+Otherwise, apply the manifest with `kubectl`:
 
 ```shell
 kubectl apply -f wasmcloud-proj.yaml
@@ -214,7 +216,7 @@ spec:
         hostgroup: public-ingress
       components:
         - name: hello-world
-          image: ghcr.io/ericgregory/components/hello-world:3.0.2
+          image: ghcr.io/ericgregory/gitops-demo:1.0.0
       hostInterfaces:
         - namespace: wasi
           package: http
