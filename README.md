@@ -226,7 +226,7 @@ spec:
             host: localhost
 ```
 
-Don't make any changes at this stage, but note the OCI artifact we're using on Line 12: it's in my namespace and tagged `3.0.2`.
+Don't make any changes at this stage, but note the OCI artifact we're using on Line 12: it's in my namespace and tagged `1.0.0`.
 
 Now apply the `hello-proj.yaml` Argo Application CRD manifest from your `gitops-demo` repo:
 
@@ -274,7 +274,7 @@ Before you start this step, check the Settings page for your repo and make sure 
 
 Now we'll create a release in GitHub. Click "Create a new release" in the right sidebar of your gitops-demo fork's repository page, or navigate to `https://github.com/<your-github-namespace>/gitops-demo/releases/new`.
 
-Let's call our release `3.0.3`. Create a new image tag, title the release, and click "Publish release."
+Let's call our release `2.0.0`. Create a new image tag, title the release, and click "Publish release."
 
 Publishing the release will trigger a GitHub Workflow. (If you'd like to watch the run, you can click the "Actions" tab for the repo and select "publish" under Jobs.) This workflow will:
 
