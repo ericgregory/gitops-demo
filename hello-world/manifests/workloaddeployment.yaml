@@ -10,7 +10,7 @@ spec:
         hostgroup: public-ingress
       components:
         - name: hello-world
-          image: ghcr.io/ericgregory/gitops-demo:1.0.0
+          image: ghcr.io/ericgregory/gitops-demo:2.0.0
       hostInterfaces:
         - namespace: wasi
           package: http
