@@ -8,7 +8,6 @@ The directory includes the following files and directories:
 
 - `/hello-world/`: A simple `hello-world` WebAssembly component in Rust
 - `hello-proj.yaml`: An Argo CD Application CRD for the `hello-world` component
-- `hostgroup-proj.yaml`: An Argo CD Application CRD for a wasmCloud host group
 - `wasmcloud-proj.yaml`: An Argo CD Application CRD for wasmCloud infrastructure
 - `.github/workflows/hello-world.yml`: A GitHub Workflow that is triggered on release. This workflow uses the [`setup-wash` GitHub Action](https://github.com/wasmCloud/setup-wash-action) to build the component and push an OCI artifact to GHCR. The workflow should work in your own fork and can be adapted for other Rust-based Wasm components with minimal changes.
 
@@ -67,8 +66,8 @@ metadata:
 spec:
   project: default
   source:
-    chart: runtime-operator
-    repoURL: ghcr.io/wasmcloud
+    chart: charts/runtime-operator
+    repoURL: ghcr.io/ericgregory
     targetRevision: 0.1.0
   destination:
     name: 'in-cluster'
@@ -97,9 +96,9 @@ Apply the manifest with `kubectl`:
 kubectl apply -f wasmcloud-proj.yaml
 ```
 
-The Applications will appear on the Argo CD dashboard. It may take a moment for the Applications to finish syncing.
+The Application will appear on the Argo CD dashboard. It may take a moment for the Application to finish syncing.
 
-![ TK SCREENSHOT OF HELM-SOURCED APPS ](TK)
+![Helm-sourced wasmCloud](./images/argo-wasmcloud-app.png)
 
 ## Fork the demo repository
 
@@ -172,7 +171,7 @@ spec:
         hostgroup: public-ingress
       components:
         - name: hello-world
-          image: ghcr.io/ericgregory/components/hello-world:0.1.0
+          image: ghcr.io/ericgregory/components/hello-world:3.0.2
       hostInterfaces:
         - namespace: wasi
           package: http
@@ -182,7 +181,7 @@ spec:
             host: localhost
 ```
 
-Don't make any changes at this stage, but note the OCI artifact we're using on Line 12: it's in my namespace and tagged `0.1.0`.
+Don't make any changes at this stage, but note the OCI artifact we're using on Line 12: it's in my namespace and tagged `3.0.2`.
 
 Now apply the `hello-proj.yaml` Argo Application CRD manifest from your `gitops-demo` repo:
 
@@ -221,7 +220,7 @@ Now we'll create a release in GitHub. Click "Create a new release" in the right 
 
 ![TK Create a new release](TK)
 
-Let's call our release `0.2.0`. Create a new image tag, title the release, and click "Publish release."
+Let's call our release `3.0.3`. Create a new image tag, title the release, and click "Publish release."
 
 ![TK Publish release](TK)
 
