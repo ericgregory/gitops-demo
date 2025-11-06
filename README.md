@@ -266,6 +266,10 @@ If you decide to edit the message, commit the changes.
 
 ### Create a release
 
+Before you start this step, check the Settings page for your repo and make sure GitHub Actions has permission to make pull requests:
+
+![Permissions](./images/actions-permissions.png)
+
 Now we'll create a release in GitHub. Click "Create a new release" in the right sidebar of your gitops-demo fork's repository page, or navigate to `https://github.com/<your-github-namespace>/gitops-demo/releases/new`.
 
 Let's call our release `3.0.3`. Create a new image tag, title the release, and click "Publish release."
