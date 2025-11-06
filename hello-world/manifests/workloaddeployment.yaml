@@ -10,7 +10,7 @@ spec:
         hostgroup: public-ingress
       components:
         - name: hello-world
-          image: ghcr.io/ericgregory/components/hello-world:3.0.2
+          image: ghcr.io//components/hello-world:0.2.0
       hostInterfaces:
         - namespace: wasi
           package: http
