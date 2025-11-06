@@ -69,6 +69,51 @@ spec:
     chart: charts/runtime-operator
     repoURL: ghcr.io/ericgregory
     targetRevision: 0.1.0
+    helm:
+      values: |
+        runtime:
+          image:
+            repository: cosmonic-labs/wash-host
+            tag: "canary"
+          hostGroups:
+            - name: public-ingress
+              replicas: 1
+              service:
+                type: NodePort
+              http:
+                enabled: true
+                port: 80
+                nodePort: 30950
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m" # 0.25 CPU cores
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m" # 0.5 CPU cores
+            - name: private-ingress
+              replicas: 1
+              service:
+                type: ClusterIP
+              http:
+                enabled: true
+                port: 80
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m" # 0.25 CPU cores
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m" # 0.5 CPU cores
+            - name: default
+              replicas: 1
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m" # 0.25 CPU cores
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m" # 0.5 CPU cores
   destination:
     name: 'in-cluster'
     namespace: wasmcloud-system
@@ -103,8 +148,6 @@ The Application will appear on the Argo CD dashboard. It may take a moment for t
 ## Fork the demo repository
 
 Create a fork of this repository on GitHub. (These instructions assume that you use the name `gitops-demo` for your fork&mdash;if you change the name, remember to adjust the commands accordingly.)
-
-![TK Create a fork](TK)
 
 You can clone the forked repository locally or work entirely in the browser. The only difference is that you'll need to copy and paste an Argo CD Application CRD manifest if you work in the browser.
 
@@ -189,15 +232,11 @@ Now apply the `hello-proj.yaml` Argo Application CRD manifest from your `gitops-
 kubectl apply -f hello-proj.yaml
 ```
 
-You should quickly see the hello-world Application healthy and synced in the Argo CD dashboard.
-
-![TK Hello world synced](TK)
-
-The `hello-world` Application is configured to **Auto-Sync**&mdash;when Argo detects changes to the source manifest, it will roll out an update to the deployment.
+You should quickly see the hello-world Application healthy and synced in the Argo CD dashboard. The `hello-world` Application is configured to **Auto-Sync**&mdash;when Argo detects changes to the source manifest, it will roll out an update to the deployment.
 
 You can click on an Application to view it in more detail. Try clicking on the hello-world Application to view the resources defining the Wasm workload.
 
-![TK Wasm component workload](TK)
+![Wasm component workload](./images/hello-world-detail.png)
 
 ## Trigger a sync
 
@@ -218,11 +257,7 @@ If you decide to edit the message, commit the changes.
 
 Now we'll create a release in GitHub. Click "Create a new release" in the right sidebar of your gitops-demo fork's repository page, or navigate to `https://github.com/<your-github-namespace>/gitops-demo/releases/new`.
 
-![TK Create a new release](TK)
-
 Let's call our release `3.0.3`. Create a new image tag, title the release, and click "Publish release."
-
-![TK Publish release](TK)
 
 Publishing the release will trigger a GitHub Workflow. (If you'd like to watch the run, you can click the "Actions" tab for the repo and select "publish" under Jobs.) This workflow will:
 
