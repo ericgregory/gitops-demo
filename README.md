@@ -309,11 +309,9 @@ After building the component from your repo, the run submits a pull request upda
 
 Once the run completes successfully, merge the automated pull request, switch over to the Argo CD dashboard, and take a look at the hello-world Application. You should see that it has synced.
 
-![TK Successful sync](TK)
+![Successful sync](./images/successful-sync.png)
 
-You can click through to see the commit that triggered the sync, or click on the Application at the left-hand side of the diagram and see the events associated with it:
-
-![TK Events in Argo CD UI](TK)
+You can click through to see the commit that triggered the sync, or click on the Application at the left-hand side of the diagram and see the events associated with it.
 
 ### Test the deployment
 
