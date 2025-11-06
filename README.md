@@ -281,7 +281,7 @@ Publishing the release will trigger a GitHub Workflow. (If you'd like to watch t
 - Compile a Wasm binary from the Rust code in the hello-world directory using the [setup-wash GitHub Action](https://github.com/wasmCloud/setup-wash-action)
 - Push the Wasm component to ghcr.io as an OCI artifact under your namespace
 - Update the image tag in the component's Kubernetes manifest to reflect the version of your new release
-- Commit and push the manifest update in your repo
+- Make a pull request to your repo with the manifest update
 
 **Note**: The first time this workflow runs in your repository, it will take several minutes to build the necessary tooling, but those tools will be cached&mdash;future runs in the repo will generally take under a minute.
 
@@ -293,7 +293,7 @@ In the meantime, let's take a look at the last steps of the GitHub Workflow file
   run: |
     DEPLOYMENT_FILE="manifests/workloaddeployment.yaml"
     OLD_IMAGE=$(grep "image:" "$DEPLOYMENT_FILE" | awk '{print $2}')
-    NEW_IMAGE="ghcr.io/${{ env.GHCR_REPO_NAMESPACE }}/components/hello-world:${{ github.ref_name }}"
+    NEW_IMAGE="ghcr.io/${{ env.REPO_OWNER_LC }}/gitops-demo:${{ github.ref_name }}"
 
     # Update the image tag
     sed -i "s|image:.*|image: $NEW_IMAGE|" "$DEPLOYMENT_FILE"
@@ -304,10 +304,20 @@ In the meantime, let's take a look at the last steps of the GitHub Workflow file
     token: ${{ secrets.GITHUB_TOKEN }}
     commit-message: |
       Update image tag in manifest to ${{ github.ref_name }}
-    title: Update image tag in manifest to ${{ github.ref_name }}
+    title: "Update image tag in manifest to ${{ github.ref_name }}"
+    body: |
+      ## Automated PR
+
+      This PR updates image tags in the workloaddeployment.yaml manifest.
+    branch: release/update-image-tags-${{ github.ref_name }}
+    delete-branch: true
+    base: main
+    labels: |
+      automated
+      release
 ```
 
-After building the component from your repo, the run submits a pull request updating the image specification in the hello-world manifest that our Argo CD hello-world Application is targeting, so that the manifest specifies an 0.2.0 image in _your_ GHCR registry. This change to the manifest will trigger a sync in Argo CD.
+After building the component from your repo, the run submits a pull request updating the image specification in the workloaddeployment.yaml manifest that our Argo CD hello-world Application is targeting, so that the manifest specifies an 2.0.0 image in _your_ GHCR registry. This change to the manifest will trigger a sync in Argo CD.
 
 Once the run completes successfully, merge the automated pull request, switch over to the Argo CD dashboard, and take a look at the hello-world Application. You should see that it has synced.
 

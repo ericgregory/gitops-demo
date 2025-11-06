@@ -1,9 +1,0 @@
-{
-  "message": "Successfully built component at: /home/runner/work/gitops-demo/gitops-demo/hello-world/target/wasm32-wasip2/debug/hello_world.wasm",
-  "success": true,
-  "data": {
-    "component_path": "/home/runner/work/gitops-demo/gitops-demo/hello-world/target/wasm32-wasip2/debug/hello_world.wasm",
-    "project_path": ".",
-    "project_type": "rust"
-  }
-}
