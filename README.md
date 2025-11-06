@@ -234,9 +234,20 @@ kubectl apply -f hello-proj.yaml
 
 You should quickly see the hello-world Application healthy and synced in the Argo CD dashboard. The `hello-world` Application is configured to **Auto-Sync**&mdash;when Argo detects changes to the source manifest, it will roll out an update to the deployment.
 
+![Wasm component](./images/hello-world.png)
+
 You can click on an Application to view it in more detail. Try clicking on the hello-world Application to view the resources defining the Wasm workload.
 
 ![Wasm component workload](./images/hello-world-detail.png)
+
+We can also call the component with `curl`:
+
+```shell
+curl localhost -i
+```
+```text
+Hello from wasmCloud!
+```
 
 ## Trigger a sync
 
@@ -247,7 +258,7 @@ Now let's try a more in-depth GitOps workflow to trigger a Wasm component sync w
 While not strictly necessary for the purposes of this example, at this stage you could use the GitHub web UI to edit the Rust code in `hello-world/src/lib.rs` and change the "Hello world" message, like so:
 
 ```diff
-+ Ok(http::Response::new("Hello from Rust!\n"))
++ Ok(http::Response::new("Hello from wasmCloud!\n"))
 - Ok(http::Response::new("Hello from wasmCloud and Argo CD!\n"))
 ```
 
