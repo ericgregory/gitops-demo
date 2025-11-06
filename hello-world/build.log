@@ -1,0 +1,3 @@
+[2m2025-11-06T20:04:35.298196Z[0m [32m INFO[0m building component [3mpath[0m[2m=[0m"."
+[2m2025-11-06T20:04:58.656521Z[0m [32m INFO[0m cargo build --target wasm32-wasip2 completed in 23.36s
+[2m2025-11-06T20:04:58.656909Z[0m [32m INFO[0m Generated project configuration at ./.wash/config.json
